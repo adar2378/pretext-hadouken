@@ -1,8 +1,5 @@
 // src/handTracker.js
 
-import { Hands } from '@mediapipe/hands';
-import { Camera as MediaPipeCamera } from '@mediapipe/camera_utils';
-
 export class HandTracker {
   constructor() {
     this.hands = null;
@@ -14,9 +11,13 @@ export class HandTracker {
   async init(videoElement) {
     this.videoElement = videoElement;
 
+    // Load MediaPipe from CDN (works better with Vite builds)
+    const { Hands } = await import('https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1646424915/hands.js');
+    const { Camera } = await import('https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.3.1620248447/camera_utils.js');
+
     this.hands = new Hands({
       locateFile: (file) => {
-        return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
+        return `https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1646424915/${file}`;
       }
     });
 
@@ -34,7 +35,7 @@ export class HandTracker {
       }
     });
 
-    this.camera = new MediaPipeCamera(videoElement, {
+    this.camera = new Camera(videoElement, {
       onFrame: async () => {
         await this.hands.send({ image: videoElement });
       },
