@@ -1,4 +1,5 @@
 // src/handTracker.js
+// Using proper MediaPipe solution with script loading
 
 export class HandTracker {
   constructor() {
@@ -8,16 +9,35 @@ export class HandTracker {
     this.videoElement = null;
   }
 
+  async loadScript(src) {
+    return new Promise((resolve, reject) => {
+      if (document.querySelector(`script[src="${src}"]`)) {
+        resolve();
+        return;
+      }
+      const script = document.createElement('script');
+      script.src = src;
+      script.crossOrigin = 'anonymous';
+      script.onload = resolve;
+      script.onerror = reject;
+      document.head.appendChild(script);
+    });
+  }
+
   async init(videoElement) {
     this.videoElement = videoElement;
 
-    // Load MediaPipe from CDN (works better with Vite builds)
-    const { Hands } = await import('https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1646424915/hands.js');
-    const { Camera } = await import('https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.3.1620248447/camera_utils.js');
+    // Load MediaPipe from CDN via script tags (works with Vite builds)
+    await this.loadScript('https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js');
+    await this.loadScript('https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js');
+
+    // Access from window
+    const Hands = window.Hands;
+    const Camera = window.Camera;
 
     this.hands = new Hands({
       locateFile: (file) => {
-        return `https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1646424915/${file}`;
+        return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
       }
     });
 
