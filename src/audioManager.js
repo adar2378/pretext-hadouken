@@ -18,18 +18,18 @@ export class AudioManager {
     // Load sound files
     // Note: You'll need to add actual sound files to public/sounds/
     try {
-      this.sounds.charging = new Audio('/sounds/hadouken-charge.mp3');
+      this.sounds.charging = new Audio(`${import.meta.env.BASE_URL}sounds/hadouken-charge.mp3`);
       this.sounds.charging.loop = true; // Charging sound loops
       this.sounds.charging.volume = 0.6;
 
-      this.sounds.blast = new Audio('/sounds/hadouken-blast.mp3');
+      this.sounds.blast = new Audio(`${import.meta.env.BASE_URL}sounds/hadouken-blast.mp3`);
       this.sounds.blast.volume = 0.8;
 
-      this.sounds.impact = new Audio('/sounds/hadouken-impact.mp3');
+      this.sounds.impact = new Audio(`${import.meta.env.BASE_URL}sounds/hadouken-impact.mp3`);
       this.sounds.impact.volume = 0.7;
 
       // Load background music
-      this.sounds.bgm = new Audio('/sounds/street-fighter-bgm.mp3');
+      this.sounds.bgm = new Audio(`${import.meta.env.BASE_URL}sounds/street-fighter-bgm.mp3`);
       this.sounds.bgm.loop = true;
       this.sounds.bgm.volume = 0.3; // Lower volume for background
 
