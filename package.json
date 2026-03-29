@@ -1,0 +1,32 @@
+{
+  "name": "pretext-hadouken",
+  "version": "1.0.0",
+  "description": "Camera-based hand gesture controlled text blaster using WebGL, MediaPipe, and Pretext",
+  "type": "module",
+  "author": "Saiful Islam",
+  "license": "MIT",
+  "keywords": [
+    "webgl",
+    "mediapipe",
+    "hand-tracking",
+    "gesture-control",
+    "three.js",
+    "pretext",
+    "interactive",
+    "demo"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@chenglou/pretext": "^0.0.3",
+    "@mediapipe/hands": "^0.4.1646424915",
+    "@mediapipe/camera_utils": "^0.3.1620248447",
+    "three": "^0.161.0"
+  },
+  "devDependencies": {
+    "vite": "^5.1.0"
+  }
+}

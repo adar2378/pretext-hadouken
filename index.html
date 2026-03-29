@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pretext Hadouken Demo - Hand Gesture Text Blaster</title>
+  <meta name="description" content="Camera-based hand gesture controlled text blaster using WebGL, MediaPipe, and Pretext. Channel your inner Street Fighter!">
+
+  <!-- Open Graph / Social Media -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Pretext Hadouken Demo">
+  <meta property="og:description" content="Control flowing ASCII text with Street Fighter hand gestures using MediaPipe AI">
+  <meta property="og:image" content="/preview.png">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Pretext Hadouken Demo">
+  <meta name="twitter:description" content="Hand gesture controlled text blaster with MediaPipe">
+  <meta name="twitter:image" content="/preview.png">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      overflow: hidden;
+      background: #000;
+      font-family: 'Inter', -apple-system, system-ui, sans-serif;
+    }
+
+    #app {
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+    }
+
+    #stage {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    #status {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      color: white;
+      font-size: 14px;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 10px 15px;
+      border-radius: 8px;
+      font-family: monospace;
+    }
+
+    #loading {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: white;
+      font-size: 18px;
+      text-align: center;
+    }
+
+    #loading .subtitle {
+      font-size: 14px;
+      margin-top: 10px;
+      opacity: 0.7;
+    }
+
+    #loading .error {
+      color: #ff4444;
+    }
+
+    #loading .error-detail {
+      font-size: 12px;
+      margin-top: 10px;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    #instructions {
+      position: absolute;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.85);
+      color: white;
+      padding: 20px 30px;
+      border-radius: 12px;
+      font-size: 14px;
+      max-width: 500px;
+      text-align: center;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      animation: fadeIn 1s ease-in;
+      z-index: 100;
+    }
+
+    #instructions h3 {
+      margin: 0 0 15px 0;
+      font-size: 18px;
+      color: #4af;
+    }
+
+    #instructions ol {
+      text-align: left;
+      margin: 10px 0;
+      padding-left: 20px;
+    }
+
+    #instructions li {
+      margin: 8px 0;
+      line-height: 1.5;
+    }
+
+    #instructions .close-btn {
+      margin-top: 15px;
+      padding: 8px 20px;
+      background: #4af;
+      color: black;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 13px;
+    }
+
+    #instructions .close-btn:hover {
+      background: #6cf;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+      to { opacity: 1; transform: translateX(-50%) translateY(0); }
+    }
+
+    #hand-feedback {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: rgba(0, 0, 0, 0.85);
+      color: white;
+      padding: 12px 18px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: monospace;
+      border: 2px solid rgba(255, 100, 100, 0.5);
+      z-index: 100;
+      transition: all 0.3s ease;
+    }
+
+    #hand-feedback.both-hands {
+      border-color: #4af;
+      background: rgba(0, 170, 255, 0.25);
+    }
+
+    #hand-feedback .status-icon {
+      font-size: 20px;
+      margin-right: 8px;
+    }
+
+    #hand-feedback .tip {
+      font-size: 11px;
+      margin-top: 6px;
+      opacity: 0.8;
+      color: #ffaa00;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div id="stage"></div>
+    <div id="loading">
+      <div>Loading Hadouken Demo...</div>
+      <div class="subtitle">Camera permission required</div>
+    </div>
+    <!-- Status display hidden -->
+    <div id="status" class="hidden" style="display: none;">
+      <div id="fps">FPS: --</div>
+      <div id="gesture">Gesture: IDLE</div>
+    </div>
+
+    <!-- Hand detection feedback -->
+    <div id="hand-feedback" class="hidden">
+      <div>
+        <span class="status-icon">👋</span>
+        <span id="hand-status">No hands detected</span>
+      </div>
+      <div class="tip" id="hand-tip"></div>
+    </div>
+
+    <!-- Instructions overlay -->
+    <div id="instructions" class="hidden">
+      <h3>🥋 How to Hadouken</h3>
+      <ol>
+        <li><strong>Show both hands</strong> to the camera</li>
+        <li><strong>Bring hands together</strong> at chest height</li>
+        <li>Wait for the blue energy orb to charge (~0.5s)</li>
+        <li><strong>Push forward</strong> or <strong>thrust up</strong> to blast! 💥</li>
+      </ol>
+      <p style="font-size: 12px; margin-top: 12px; opacity: 0.8;">
+        💡 Tip: The gesture is forgiving - just make a quick pushing motion!
+      </p>
+      <button class="close-btn" onclick="document.getElementById('instructions').classList.add('hidden')">
+        Got it!
+      </button>
+    </div>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+  <script>
+    // Show instructions after camera loads
+    setTimeout(() => {
+      const loading = document.getElementById('loading');
+      const instructions = document.getElementById('instructions');
+      if (loading && loading.classList.contains('hidden')) {
+        instructions.classList.remove('hidden');
+        // Auto-hide after 10 seconds
+        setTimeout(() => instructions.classList.add('hidden'), 10000);
+      }
+    }, 2000);
+  </script>
+</body>
+</html>
