@@ -21,10 +21,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@chenglou/pretext": "^0.0.3",
-    "@mediapipe/hands": "^0.4.1646424915",
-    "@mediapipe/camera_utils": "^0.3.1620248447",
-    "three": "^0.161.0"
+    "@chenglou/pretext": "^0.0.3"
   },
   "devDependencies": {
     "vite": "^5.1.0"
